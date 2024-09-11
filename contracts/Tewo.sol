@@ -105,20 +105,20 @@ contract Chakula {
         });
     }
 
-    function requestPurchase(
-        uint256 _produceId,
-        uint256 _quantity
-    ) external payable {
-        Produce storage produce = allProduce[_produceId];
-        _validatePurchase(produce, _quantity, msg.value);
-
-        requestCount++;
-        _createPurchaseRequest(requestCount, _produceId, msg.sender, _quantity);
-
-        _updateProduceQuantity(produce, _quantity);
-
-        emit PurchaseRequested(msg.sender, _produceId, _quantity);
+function batchRequestPurchase(
+    uint256[] calldata produceIds,
+    uint256[] calldata quantities
+) external payable {
+    require(produceIds.length == quantities.length, "Array length mismatch");
+    uint256 totalCost = 0;
+    for (uint256 i = 0; i < produceIds.length; i++) {
+        Produce storage produce = allProduce[produceIds[i]];
+        _validatePurchase(produce, quantities[i], msg.value);
+        totalCost += produce.price * quantities[i];
     }
+    require(msg.value == totalCost, "Incorrect Ether amount");
+}
+
 
     function _validatePurchase(
         Produce storage produce,
@@ -215,10 +215,10 @@ contract Chakula {
         _roles[role][account] = false;
     }
 
-    function withdraw() public onlyRole(ADMIN_ROLE) {
-        uint256 amount = address(this).balance;
-        payable(msg.sender).transfer(amount);
-    }
+   function withdraw() external onlyRole(ADMIN_ROLE) {
+    uint256 amount = address(this).balance;
+    payable(msg.sender).transfer(amount);
+}
 
     receive() external payable {}
 

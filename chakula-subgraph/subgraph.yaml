@@ -1,0 +1,35 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: chakula
+    network: sepolia
+    source:
+      address: "0x1234567890123456789012345678901234567890" 
+      abi: Tewo
+      startBlock: 0  # Replace with the block number where your contract was deployed
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Produce
+        - PurchaseRequest
+        - ProduceListedEvent
+        - PurchaseRequestedEvent
+        - ProduceDeliveredEvent
+        - PaymentMadeEvent
+      abis:
+        - name: Tewo
+          file: ./abis/Tewo.json  
+      eventHandlers:
+        - event: ProduceListed(indexed address,indexed uint256,string,uint256)
+          handler: handleProduceListed
+        - event: PurchaseRequested(indexed address,indexed uint256,uint256)
+          handler: handlePurchaseRequested
+        - event: ProduceDelivered(indexed uint256,indexed address,indexed address)
+          handler: handleProduceDelivered
+        - event: PaymentMade(indexed uint256,indexed address,uint256)
+          handler: handlePaymentMade
+      file: ./src/mapping.ts
